@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+
+require 'jockey'
+
+type = ARGV.shift
+
+case type
+when 'tf_idf' then Jockey.tf_idf(ARGV.shift)
+when 'index' then Jockey.index(ARGV)
+end
