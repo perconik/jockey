@@ -1,0 +1,10 @@
+next:
+  - spracovat komentare inak
+  - language specific tokenizer
+  - boost:
+    - mena premennych, tried
+  - klucove slova pre metodu / metoda = dokument
+
+
+31.5. funkcna sluzba pre extrakciu zdrojakov
+

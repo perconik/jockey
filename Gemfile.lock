@@ -1,0 +1,21 @@
+GIT
+  remote: https://github.com/taf2/curb.git
+  revision: 868b8405b8ead7b4bf87d5935e01e41b978f30e0
+  specs:
+    curb (0.8.0)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    hashugar (0.0.6)
+    json (1.7.0)
+    settingslogic (2.0.8)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  curb!
+  hashugar
+  json
+  settingslogic
