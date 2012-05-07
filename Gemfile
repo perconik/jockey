@@ -1,7 +1,8 @@
 source :rubygems
 
-gem 'curb', :git => 'https://github.com/taf2/curb.git'
+gem 'curb'
 gem 'settingslogic'
 gem 'json'
 gem 'hashugar'
 gem 'classifier'
+gem 'madeleine'

@@ -2,6 +2,8 @@ require 'naive_source_code_tokenizer'
 require 'elastic_search_corpus'
 require 'elastic_search_index'
 require 'corpus_repository'
+require 'code_finder'
+require 'bayesian_classifier'
 
 class TokenPreprocessor
   def self.transform(token)
@@ -42,7 +44,9 @@ class SortByTfIdf
 end
 
 class Jockey
-  def self.tf_idf(type, path_to_file, reporter = StdOutReporter, filters = [SortByTfIdf])
+  def self.tf_idf(path_to_file, classifier = BayesianClassifier.new, reporter = StdOutReporter, filters = [SortByTfIdf])
+    type = classifier.classify(File.read(path_to_file)).downcase
+    puts "Document classified as #{type}"
     corpus = corpus_repository.corpus_for_type(type)
     frequencies = {}
     tfidfs = {}
@@ -57,11 +61,22 @@ class Jockey
     reporter.report(run_filters(tfidfs, filters))
   end
 
-  def self.train(corpus_path)
-    Dir.glob("#{corpus_path}/*").each do |type_path|
-      type = File.basename(type_path)
-      corpus = corpus_repository.corpus_for_type(type)
-      corpus.index(type_path)
+  def self.train(corpus_path, classifier_class = BayesianClassifier)
+    types = CodeFinder.lookup_types(corpus_path)
+    classifier_class.new(types.keys).training do |classifier|
+      types.each do |type, reader|
+        puts "\nTraining type #{type}"
+        corpus = corpus_repository.corpus_for_type(type)
+        reader.each_file do |document|
+          print '.'
+          begin
+            corpus.index(document)
+            classifier.train(type, document)
+          rescue Exception => e
+            puts e
+          end
+        end
+      end
     end
   end
 
@@ -77,5 +92,9 @@ class Jockey
 
   def self.sampler
     @sampler ||= FrequencySampler
+  end
+
+  def classifier
+    @classifier = CodeClassifier.new
   end
 end

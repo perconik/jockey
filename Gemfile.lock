@@ -1,17 +1,13 @@
-GIT
-  remote: https://github.com/taf2/curb.git
-  revision: 868b8405b8ead7b4bf87d5935e01e41b978f30e0
-  specs:
-    curb (0.8.0)
-
 GEM
   remote: http://rubygems.org/
   specs:
     classifier (1.3.3)
       fast-stemmer (>= 1.0.0)
+    curb (0.8.0)
     fast-stemmer (1.0.1)
     hashugar (0.0.6)
     json (1.7.0)
+    madeleine (0.7.3)
     settingslogic (2.0.8)
 
 PLATFORMS
@@ -19,7 +15,8 @@ PLATFORMS
 
 DEPENDENCIES
   classifier
-  curb!
+  curb
   hashugar
   json
+  madeleine
   settingslogic

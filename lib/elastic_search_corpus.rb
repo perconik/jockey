@@ -1,22 +1,12 @@
 require 'elastic_search_index'
 
 class ElasticSearchCorpus
-  def initialize(type, pattern, index = nil)
+  def initialize(type, index = nil)
     @index = index || ElasticSearchIndex.new(type)
-    @pattern = pattern
   end
 
-  def index(path)
-    Dir.glob("#{path}/#{@pattern}").each do |path|
-      puts "Indexing #{path}"
-      unless File.directory?(path)
-        begin
-          @index.index(File.read(path))
-        rescue Exception => e
-          puts e
-        end
-      end
-    end
+  def index(document)
+    @index.index(document)
   end
 
   def size
