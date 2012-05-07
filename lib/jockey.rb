@@ -1,6 +1,7 @@
 require 'naive_source_code_tokenizer'
-require 'background_corpus'
-require 'elastic_search_storage'
+require 'elastic_search_corpus'
+require 'elastic_search_index'
+require 'corpus_repository'
 
 class TokenPreprocessor
   def self.transform(token)
@@ -41,7 +42,8 @@ class SortByTfIdf
 end
 
 class Jockey
-  def self.tf_idf(path_to_file, reporter = StdOutReporter, filters = [SortByTfIdf])
+  def self.tf_idf(type, path_to_file, reporter = StdOutReporter, filters = [SortByTfIdf])
+    corpus = corpus_repository.corpus_for_type(type)
     frequencies = {}
     tfidfs = {}
     sampler.sample(path_to_file, frequencies, NaiveSourceCodeTokenizer)
@@ -55,8 +57,12 @@ class Jockey
     reporter.report(run_filters(tfidfs, filters))
   end
 
-  def self.index(paths)
-    corpus.index(paths)
+  def self.train(corpus_path)
+    Dir.glob("#{corpus_path}/*").each do |type_path|
+      type = File.basename(type_path)
+      corpus = corpus_repository.corpus_for_type(type)
+      corpus.index(type_path)
+    end
   end
 
   private
@@ -65,8 +71,8 @@ class Jockey
     filters.inject(tfidfs) { |memo, filter| filter.run(memo) }
   end
 
-  def self.corpus
-    @corpus ||= BackgroundCorpus.new(ElasticSearchStorage.new)
+  def self.corpus_repository
+    @repository ||= CorpusRepository.new
   end
 
   def self.sampler

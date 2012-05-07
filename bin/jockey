@@ -7,6 +7,6 @@ require 'jockey'
 type = ARGV.shift
 
 case type
-when 'tf_idf' then Jockey.tf_idf(ARGV.shift)
-when 'index' then Jockey.index(ARGV)
+when 'tf_idf' then Jockey.tf_idf(ARGV.shift, ARGV.shift)
+when 'train' then Jockey.train(ARGV.shift)
 end

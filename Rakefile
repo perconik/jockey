@@ -5,7 +5,7 @@ require 'elastic_search_index'
 namespace :index do
   desc "Recreate index"
   task :recreate do
-    index = ElasticSearchIndex.new
+    index = ElasticSearchIndex.new("everything")
     index.drop
     index.create
   end

@@ -4,8 +4,10 @@ require 'curb'
 require 'settings'
 
 class ElasticSearchIndex
-  def initialize(config = Settings)
+  def initialize(type, config = Settings)
+    @type = type
     @base_url = "http://#{config.elastic.host}:#{config.elastic.port}/#{config.elastic.index}"
+    create_mapping_for(type) unless mapping_exists?(type)
   end
 
   def create
@@ -21,20 +23,6 @@ class ElasticSearchIndex
               }
             }
           }
-        },
-        "mappings":{
-          "document": {
-            "properties": {
-              "code": {
-                "type": "string",
-                "store": "no",
-                "analyzer": "source_code"
-              }
-            },
-            "_all": {
-              "analyzer": "source_code"
-            }
-          }
         }
       }
     JSON
@@ -47,13 +35,45 @@ class ElasticSearchIndex
     raise Exception.new(response.body_str) if response.response_code == 500 || response.response_code == 400
   end
 
+  def recreate
+    drop
+    create
+  end
+
+  def create_mapping_for(type)
+    mapping = <<-JSON
+      {
+        "#{type}": {
+          "properties": {
+            "code": {
+              "type": "string",
+              "store": "no",
+              "analyzer": "source_code"
+            }
+          },
+          "_all": {
+            "analyzer": "source_code"
+          }
+        }
+      }
+    JSON
+    response = Curl::Easy.http_put(document_mapping_url, mapping)
+    raise Exception.new(response.body_str) if response.response_code == 500 || response.response_code == 400
+  end
+
+  def mapping_exists?(type)
+    response = Curl::Easy.http_get(document_mapping_url)
+    raise Exception.new(response.body_str) if response.response_code == 500 || response.response_code == 400
+    response.response_code == 200
+  end
+
   def index(document)
     response = Curl::Easy.http_post(document_url, document_to_json(document))
     raise Exception.new(response.body_str) if response.response_code == 500 || response.response_code == 400
   end
 
-  def statistics
-    response = Curl::Easy.http_get(stats_url)
+  def count
+    response = Curl::Easy.http_get(count_url)
     raise Exception.new(response.body_str) if response.response_code == 500 || response.response_code == 400
     JSON.parse(response.body_str).to_hashugar
   end
@@ -75,15 +95,19 @@ class ElasticSearchIndex
   private
 
   def document_url
-    "#{@base_url}/document/"
+    "#{@base_url}/#{@type}/"
   end
 
-  def stats_url
-    "#{@base_url}/_stats"
+  def count_url
+    "#{@base_url}/#{@type}/_count"
+  end
+
+  def document_mapping_url
+    "#{@base_url}/#{@type}/_mapping"
   end
 
   def document_msearch_url
-    "#{@base_url}/document/_msearch"
+    "#{@base_url}/#{@type}/_msearch"
   end
 
   def search_params(token)
@@ -99,7 +123,7 @@ class ElasticSearchIndex
   def document_to_json(document)
     <<-JSON
     {
-      "document": {
+      "#{@type}": {
         "code": "#{escape_javascript(document)}"
       }
     }
