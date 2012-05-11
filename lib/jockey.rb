@@ -12,8 +12,8 @@ class TokenPreprocessor
 end
 
 class FrequencySampler
-  def self.sample(path, frequencies, tokenizer, preprocessor = TokenPreprocessor)
-    tokenizer.tokenize(path).each do |token|
+  def self.sample(document, frequencies, tokenizer, preprocessor = TokenPreprocessor)
+    tokenizer.tokenize(document).each do |token|
       token = preprocessor.transform(token)
       frequencies[token] ||= 0
       frequencies[token] += 1
@@ -29,28 +29,14 @@ class TfIdf
   end
 end
 
-class StdOutReporter
-  def self.report(tfidfs)
-    tfidfs.each_pair do |token, tfidf|
-      puts("%s: %.3f" % [token, tfidf])
-    end
-  end
-end
-
-class SortByTfIdf
-  def self.run(tfidfs)
-    tfidfs.sort_by { |k,v| v }.reverse.inject(Hash.new) { |memo, pair| memo[pair[0]] = pair[1]; memo }
-  end
-end
-
 class Jockey
-  def self.tf_idf(path_to_file, classifier = BayesianClassifier.new, reporter = StdOutReporter, filters = [SortByTfIdf])
-    type = classifier.classify(File.read(path_to_file)).downcase
+  def self.tf_idf(document, classifier = BayesianClassifier.new)
+    type = classifier.classify(document).downcase
     puts "Document classified as #{type}"
     corpus = corpus_repository.corpus_for_type(type)
     frequencies = {}
     tfidfs = {}
-    sampler.sample(path_to_file, frequencies, NaiveSourceCodeTokenizer)
+    sampler.sample(document, frequencies, NaiveSourceCodeTokenizer)
     corpus_frequencies = corpus.frequencies(frequencies.keys)
     frequencies.each_pair do |token, frequency|
       puts "Token: #{token}, frequency in corpus: #{corpus_frequencies[token]}, corpus size: #{corpus.size}"
@@ -58,7 +44,7 @@ class Jockey
       tfidfs[token] = tfidf
     end
 
-    reporter.report(run_filters(tfidfs, filters))
+    tfidfs
   end
 
   def self.train(corpus_path, classifier_class = BayesianClassifier)
@@ -82,10 +68,6 @@ class Jockey
 
   private
 
-  def self.run_filters(tfidfs, filters)
-    filters.inject(tfidfs) { |memo, filter| filter.run(memo) }
-  end
-
   def self.corpus_repository
     @repository ||= CorpusRepository.new
   end
@@ -94,7 +76,7 @@ class Jockey
     @sampler ||= FrequencySampler
   end
 
-  def classifier
-    @classifier = CodeClassifier.new
+  def self.classifier
+    @classifier = BayesianClassifier.new
   end
 end

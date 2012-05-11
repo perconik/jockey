@@ -4,9 +4,29 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'jockey'
 
+class StdOutReporter
+  def self.report(tfidfs, filters)
+    run_filters(tfidfs, filters).each_pair do |token, tfidf|
+      puts("%s: %.3f" % [token, tfidf])
+    end
+  end
+
+  def self.run_filters(tfidfs, filters)
+    filters.inject(tfidfs) { |memo, filter| filter.run(memo) }
+  end
+end
+
+class SortByTfIdf
+  def self.run(tfidfs)
+    tfidfs.sort_by { |k,v| v }.reverse.inject(Hash.new) { |memo, pair| memo[pair[0]] = pair[1]; memo }
+  end
+end
+
 type = ARGV.shift
 
 case type
-when 'tf_idf' then Jockey.tf_idf(ARGV.shift)
+when 'tf_idf' then 
+  tfidfs = Jockey.tf_idf(File.read(ARGV.shift))
+  StdOutReporter.report(tfidfs, [SortByTfIdf])
 when 'train' then Jockey.train(ARGV.shift)
 end
