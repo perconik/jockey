@@ -7,3 +7,5 @@ gem 'hashugar'
 gem 'classifier'
 gem 'madeleine'
 gem 'rspec'
+
+gem 'sinatra'

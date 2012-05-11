@@ -23,10 +23,11 @@ class SortByTfIdf
 end
 
 type = ARGV.shift
+jockey = Jockey.new
 
 case type
 when 'tf_idf' then 
-  tfidfs = Jockey.tf_idf(File.read(ARGV.shift))
+  tfidfs = jockey.tf_idf(File.read(ARGV.shift))
   StdOutReporter.report(tfidfs, [SortByTfIdf])
-when 'train' then Jockey.train(ARGV.shift)
+when 'train' then jockey.train(ARGV.shift)
 end

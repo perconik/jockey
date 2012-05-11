@@ -7,13 +7,20 @@ require 'frequency_sampler'
 require 'tfidf'
 
 class Jockey
-  def self.tf_idf(document, classifier = BayesianClassifier.new)
-    type = classifier.classify(document).downcase
+  def initialize
+    puts "Loading classifier data.."
+    @classifier = BayesianClassifier.new
+    puts "Done."
+    @corpus_repository = CorpusRepository.new
+  end
+
+  def tf_idf(document)
+    type = @classifier.classify(document).downcase
     puts "Document classified as #{type}"
-    corpus = corpus_repository.corpus_for_type(type)
+    corpus = @corpus_repository.corpus_for_type(type)
     frequencies = {}
     tfidfs = {}
-    sampler.sample(document, frequencies, NaiveSourceCodeTokenizer)
+    FrequencySampler.sample(document, frequencies, NaiveSourceCodeTokenizer)
     corpus_frequencies = corpus.frequencies(frequencies.keys)
     frequencies.each_pair do |token, frequency|
       puts "Token: #{token}, frequency in corpus: #{corpus_frequencies[token]}, corpus size: #{corpus.size}"
@@ -24,12 +31,12 @@ class Jockey
     tfidfs
   end
 
-  def self.train(corpus_path, classifier_class = BayesianClassifier)
+  def train(corpus_path, classifier_class = BayesianClassifier)
     types = CodeFinder.lookup_types(corpus_path)
     classifier_class.new(types.keys).training do |classifier|
       types.each do |type, reader|
         puts "\nTraining type #{type}"
-        corpus = corpus_repository.corpus_for_type(type)
+        corpus = @corpus_repository.corpus_for_type(type)
         reader.each_file do |document|
           print '.'
           begin
@@ -41,15 +48,5 @@ class Jockey
         end
       end
     end
-  end
-
-  private
-
-  def self.corpus_repository
-    @repository ||= CorpusRepository.new
-  end
-
-  def self.sampler
-    @sampler ||= FrequencySampler
   end
 end

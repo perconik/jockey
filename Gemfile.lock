@@ -9,6 +9,9 @@ GEM
     hashugar (0.0.6)
     json (1.7.0)
     madeleine (0.7.3)
+    rack (1.4.1)
+    rack-protection (1.2.0)
+      rack
     rspec (2.10.0)
       rspec-core (~> 2.10.0)
       rspec-expectations (~> 2.10.0)
@@ -18,6 +21,11 @@ GEM
       diff-lcs (~> 1.1.3)
     rspec-mocks (2.10.1)
     settingslogic (2.0.8)
+    sinatra (1.3.2)
+      rack (~> 1.3, >= 1.3.6)
+      rack-protection (~> 1.2)
+      tilt (~> 1.3, >= 1.3.3)
+    tilt (1.3.3)
 
 PLATFORMS
   ruby
@@ -30,3 +38,4 @@ DEPENDENCIES
   madeleine
   rspec
   settingslogic
+  sinatra
