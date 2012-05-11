@@ -1,7 +1,8 @@
 class CodeFinder
   TYPE_PATTERNS = {
     'ruby' => '**/*.rb',
-    'java' => '**/*.java'
+    'java' => '**/*.java',
+    'dotnet' => '**/*.cs',
   }
 
   class FileReader
