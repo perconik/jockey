@@ -1,33 +1,10 @@
 require 'naive_source_code_tokenizer'
 require 'elastic_search_corpus'
-require 'elastic_search_index'
 require 'corpus_repository'
 require 'code_finder'
 require 'bayesian_classifier'
-
-class TokenPreprocessor
-  def self.transform(token)
-    token.downcase
-  end
-end
-
-class FrequencySampler
-  def self.sample(document, frequencies, tokenizer, preprocessor = TokenPreprocessor)
-    tokenizer.tokenize(document).each do |token|
-      token = preprocessor.transform(token)
-      frequencies[token] ||= 0
-      frequencies[token] += 1
-    end
-  end
-end
-
-class TfIdf
-  def self.calculate(in_doc_freq, tokens_in_doc, corpus_appearance, docs_in_corpus)
-    tf = in_doc_freq.to_f / tokens_in_doc.to_f
-    idf =  Math.log(docs_in_corpus.to_f / corpus_appearance.to_f)
-    tf * idf
-  end
-end
+require 'frequency_sampler'
+require 'tfidf'
 
 class Jockey
   def self.tf_idf(document, classifier = BayesianClassifier.new)
@@ -74,9 +51,5 @@ class Jockey
 
   def self.sampler
     @sampler ||= FrequencySampler
-  end
-
-  def self.classifier
-    @classifier = BayesianClassifier.new
   end
 end
