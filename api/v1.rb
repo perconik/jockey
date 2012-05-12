@@ -18,7 +18,8 @@ class V1Api < Sinatra::Base
 
   post '/keywords' do
     document = params[:document]
-    @jockey.tf_idf(document).to_json
+    content_type 'application/json'
+    JSON.pretty_generate(@jockey.tf_idf(document))
   end
 
   run! if app_file == $0
