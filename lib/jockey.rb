@@ -5,6 +5,7 @@ require 'code_finder'
 require 'bayesian_classifier'
 require 'frequency_sampler'
 require 'tfidf'
+require 'filters/no_filter'
 
 class Jockey
   def initialize
@@ -14,7 +15,7 @@ class Jockey
     @corpus_repository = CorpusRepository.new
   end
 
-  def tf_idf(document)
+  def tf_idf(document, filter = NoFilter.new)
     type = @classifier.classify(document).downcase
     puts "Document classified as #{type}"
     corpus = @corpus_repository.corpus_for_type(type)
@@ -28,7 +29,7 @@ class Jockey
       tfidfs[token] = tfidf
     end
 
-    tfidfs
+    filter.filter(tfidfs)
   end
 
   def train(corpus_path, classifier_class = BayesianClassifier)
