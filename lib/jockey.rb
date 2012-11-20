@@ -6,6 +6,7 @@ require 'bayesian_classifier'
 require 'frequency_sampler'
 require 'tfidf'
 require 'filters/no_filter'
+require 'filters/above_average_filter'
 
 class Jockey
   def initialize
