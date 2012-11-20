@@ -27,7 +27,9 @@ jockey = Jockey.new
 
 case type
 when 'tf_idf' then 
-  tfidfs = jockey.tf_idf(File.read(ARGV.shift))
+  tfidfs = jockey.tf_idf(File.read(ARGV.shift), AboveAverageFilter.new)
   StdOutReporter.report(tfidfs, [SortByTfIdf])
 when 'train' then jockey.train(ARGV.shift)
+else
+  raise "Unrecognized option: #{type}"
 end
